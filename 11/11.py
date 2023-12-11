@@ -19,12 +19,21 @@ def count_distances_between_stars(multiplikator):
         first, second = pair
         x1, y1 = first
         x2, y2 = second
+        #yellow block is written by me
+        """        
         if x1 > x2:
             x1, x2 = x2, x1
         if y1 > y2:
             y1, y2 = y2, y1
         delta_x = list(filter(lambda delta: x1 < delta < x2, empty_x))
         delta_y = list(filter(lambda delta: y1 < delta < y2, empty_y))
+        """
+        #simplified version via ChatGPT
+        x1, x2 = sorted([x1, x2])
+        y1, y2 = sorted([y1, y2])
+        delta_x = [delta for delta in empty_x if x1 < delta < x2]
+        delta_y = [delta for delta in empty_y if y1 < delta < y2]
+
         distances.append(ext_manh_distance(first, second) +
                          len(delta_x) * (multiplikator-1) + len(delta_y) * (multiplikator-1))
     return sum(distances)
