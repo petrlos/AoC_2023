@@ -24,12 +24,23 @@ def count_load(platform, max_y):
             total_load += max_y - coord[1] + 1
     return total_load
 
-#MAINg
-with open("test.txt") as file:
+def move_up_possible(x,y):
+    return  (x,y-1) not in platform.keys() and y > 0
+
+#MAIN
+with open("data.txt") as file:
     lines = file.read().splitlines()
 
 platform, max_x, max_y = parse_platform(lines)
 
-print_platform(platform, max_x, max_y)
+for x in range(max_x+1):
+    for y in range(max_y+1):
+        if (x,y) in platform.keys():
+            if platform[(x,y)] == "O":
+                new_y = y
+                while move_up_possible(x,new_y):
+                    new_y -= 1
+                platform.pop((x,y))
+                platform[(x,new_y)] = "O"
 
-print(count_load(platform, max_y))
+print("Part 1:",count_load(platform, max_y))
