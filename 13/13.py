@@ -50,5 +50,4 @@ for pattern in patterns:
 
 print("Part 1", sum(part1s))
 print("Part 2", sum(part2s))
-
 print("Runtime:", datetime.now() - time_start)
