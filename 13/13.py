@@ -48,4 +48,37 @@ for pattern in patterns:
         result = 100*find_column_of_reflection(current_grid, current_grid.shape[1])
     results.append(result)
 print("Part 1:",sum(results))
+
+def find_smudge(current_grid):
+    width = current_grid.shape[1]
+    for midpoint in range(1, width):
+        left = current_grid[:, :midpoint]  # cut array left from midpoint
+        right = current_grid[:, midpoint:]
+        left_width, right_width = left.shape[1], right.shape[1]
+        cut_off = abs(left_width - right_width)
+        if left_width < right_width:
+            right = right[:, :-cut_off]
+        else:
+            left = left[:, cut_off:]
+        left = left[:, ::-1]  # reverse order of columns
+        diff = abs(left - right)
+        if np.count_nonzero(diff == 1) == 1:  # if exactly one 1 remains - differ in point
+            return midpoint
+    return -1
+
+"""
+actually is only "find_smudge" for task1 and task2 needed - only difference to be made is on 
+line 65: if np.count_nonzero(diff == 1) == 0:
+if all numbers in difference of two numpy arrays are zeros, the arrays are the same
+"""
+
+results = []
+for pattern in patterns:
+    current_grid = generate_numpy_grid(pattern)
+    result = find_smudge(current_grid)
+    if result == -1:
+        current_grid = np.rot90(current_grid, k=1)
+        result = 100 * find_smudge(current_grid)
+    results.append(result)
+print("Part 2:",sum(results))
 print("Runtime:", datetime.now() - time_start)
