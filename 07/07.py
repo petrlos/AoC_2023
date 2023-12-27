@@ -1,10 +1,21 @@
 #Advent of Code 2023: Day 7
 from collections import Counter
 
-def get_hand_type(line):
+def get_hand_type(line, part1 = True):
     card, value = line.split(" ")
-    counter = sorted(Counter(card).values(),reverse=True)
-    translate = dict(zip("TJQKA", "10,11,12,13,14".split(",")))
+    if part1:
+        counter = sorted(Counter(card).values(), reverse=True)
+        translate = dict(zip("TJQKA", "10,11,12,13,14".split(",")))
+    else:
+        counter = sorted(Counter(card).values(), reverse=True)
+        translate = dict(zip("TJQKA", "10,1,12,13,14".split(","))) #new values of cards - "J"=1
+        if "J" in card:
+            j_count = card.count("J")
+            counter = sorted(Counter(card.replace("J","")).values(), reverse=True) #count all cards except "J"
+            if len(counter) > 0:
+                counter[0] += j_count #the most common card would become "J" - best combination
+            else:
+                counter = [5] #all five were "J" - five of kind with "J"s
     new_hand_name = []
     if counter == [1,1,1,1,1]:
         hand_type = 0
@@ -36,15 +47,15 @@ def count_winnings(cards):
     return result
 
 #MAIN
-
 with open("data.txt") as file:
     lines = file.read().splitlines()
 
-cards = []
-for line in lines:
-    card = get_hand_type(line)
-    cards.append(card)
-
-#Part 1
-cards = sorted(cards)
-print("Part 1:",count_winnings(cards))
+part1 = True
+for i in range(1,3):
+    cards = []
+    for line in lines:
+        card = get_hand_type(line, part1)
+        cards.append(card)
+    cards = sorted(cards)
+    print("Part {0}: {1}".format(i,count_winnings(cards)))
+    part1 = False
