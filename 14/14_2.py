@@ -1,5 +1,6 @@
 #Advent of Code 2023: Day 14
 import numpy as np
+from collections import Counter
 
 def load_board(lines):
     board = np.zeros((max_x, max_y)) #empty slots = 0
@@ -43,3 +44,22 @@ max_x, max_y = len(lines[0]), len(lines)
 #Part 1:
 board = slide_all_columns_up(load_board(lines))
 print("Part 1:", count_load(board))
+
+#Part2
+cycle_states = []
+board = load_board(lines)
+for i in range(140):
+    states = []
+    for j in range(4):
+        if j in [0, 1]:  # save status after north and west
+            status = count_load(board)
+            states.append(status)
+        board = slide_all_columns_up(board)
+        board = np.rot90(board, k = -1)
+    cycle_states.append(tuple(states))
+    counter = [item for item, count in Counter(cycle_states).items() if count == 2]
+    if len(counter) > 0: #if anything found twice
+        break
+first = cycle_states.index(counter[0])
+result_index = (1000000000 - first) % (i - first) + first
+print("Part 2:", cycle_states[result_index][0])
