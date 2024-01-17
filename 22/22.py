@@ -1,7 +1,9 @@
 #Advent of Code 2023: Day 22
-from collections import defaultdict
+from collections import defaultdict, Counter
+from datetime import datetime
+time_start = datetime.now()
 
-def generate_cubies(brick):
+def generate_cubes(brick): #generate all single cubes
     cubes = set()
     x1, y1, z1, x2, y2, z2 = brick
     x1, x2 = sorted([x1, x2])
@@ -12,7 +14,7 @@ def generate_cubies(brick):
                 cubes.add((x,y,z))
     return cubes
 
-def overlapping(brick): #generate a set of single cubies in brick for (x,y) only, Z is not relevant
+def overlapping(brick): #generate a set of single cubes in brick for (x,y) only, Z is not relevant
     cubes = set()
     x1, y1, z1, x2, y2, z2 = brick
     x1, x2 = sorted([x1, x2])
@@ -22,55 +24,56 @@ def overlapping(brick): #generate a set of single cubies in brick for (x,y) only
             cubes.add((x, y))
     return cubes
 
-def bricks_lying_under(sitting_over):
-    lying_under = defaultdict(list)
-    for under, over in sitting_over.items():
-        for brick_over in over:
-            lying_under[brick_over].append(under)
-    return lying_under
+def generate_bricks(lines):
+    bricks = []
+    for line in lines:
+        brick = list(map(int, line.replace("~",",").split(",")))
+        bricks.append(brick)
+    return sorted(bricks, key=lambda x: x[2])
+
+def let_the_bricks_fall(bricks):
+    positions_taken = set()
+    for brick in bricks:
+        fall_down = True
+        cubes = generate_cubes(brick)
+        while fall_down:
+            brick[2] -= 1
+            brick[5] -= 1
+            one_cube_down = generate_cubes(brick)
+            if positions_taken & one_cube_down or min(brick[2], brick[5]) <= 0:
+                positions_taken |= cubes
+                fall_down = False
+            else:
+                cubes = one_cube_down
+    return bricks
 
 #MAIN
 with open("data.txt")as file:
     lines = file.read().splitlines()
 
-bricks = []
-for line in lines:
-    brick = list(map(int, line.replace("~",",").split(",")))
-    bricks.append(brick)
-bricks = sorted(bricks, key=lambda x: x[2])
+#generate list of sorted bricks from bottom to top in format "x1,y1,z1,x2,y2,z2"
+bricks = generate_bricks(lines)
+#check every single brick, if fall down possible, let it fall
+bricks = let_the_bricks_fall(bricks)
 
-positions_taken = set()
-for brick in bricks:
-    fall_down = True
-    cubes = generate_cubies(brick)
-    while fall_down:
-        brick[2] -= 1
-        brick[5] -= 1
-        one_cube_down = generate_cubies(brick)
-        if positions_taken & one_cube_down or min(brick[2], brick[5]) <= 0:
-            positions_taken |= cubes
-            fall_down = False
-        else:
-            cubes = one_cube_down
-
-sitting_over = dict()
-for index, brick in enumerate(bricks):
-    sitting_over[index] = []
-    current_z = brick[2]
-    tested_bricks = [brick_over for brick_over in bricks if brick_over[2] == current_z +1]
-    cubes_current = overlapping(brick)
+#Find out which brick lies directly over (under) + overlaps
+lying_over = defaultdict(set)   #key = lower brick, value = bricks lying upon
+lying_under = defaultdict(set)  #key = upper brick, value = bricks lying underneath
+for i, brick in enumerate(bricks):
+    cubes_current = overlapping(brick) #only (x,y) coords
+    tested_bricks = [brick_over for brick_over in bricks if brick_over[2] == brick[5] +1] #all bricks lying 1 step higher
     for tested_brick in tested_bricks:
-        cubes_tested = overlapping(tested_brick)
-        if cubes_current & cubes_tested:
-            sitting_over[index].append(bricks.index(tested_brick))
-print(sitting_over)
+        cubes_tested = overlapping(tested_brick) #only (x,y) coords
+        if cubes_current & cubes_tested: #if any (x,y) matches - bricks overlap
+            lying_over[i].add(bricks.index(tested_brick))
+            lying_under[bricks.index(tested_brick)].add(i)
 
-lying_under = bricks_lying_under(sitting_over)
+#Find out which bricks are NOT disintegrateable
+not_disintegrateable = set()
+for key, values in lying_over.items():
+    for value in values:
+        if len(lying_under[value]) == 1:
+            not_disintegrateable.add(key)
 
-may_not_be_disintegrated = set()
-for under, bricks_over in sitting_over.items():
-    all_over = [item for sublist in sitting_over.values() for item in sublist]
-    for brick_over in bricks_over:
-        if all_over.count(brick_over) == 1:
-            may_not_be_disintegrated.add(under)
-print(len(may_not_be_disintegrated))
+print("Result:", len(bricks) - len(not_disintegrateable))
+print("Runtime:", datetime.now() - time_start)
