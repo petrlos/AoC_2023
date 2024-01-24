@@ -1,5 +1,6 @@
 #Advent of Code 2023: Day 20
 from collections import deque
+from math import prod
 
 class Module:
     def __init__(self, type, name, targets):
@@ -47,8 +48,17 @@ for name, module in modules.items():
 queue = deque()
 total_low = 0
 total_high = 0
-for _ in range(1000):
-    total_low += 1
+
+part2_modules = dict()
+for name, module in modules.items():
+    if "vd" in module.targets:
+        #vd is the only module, that sends on rx - vd must send high for rx to send low
+        #vd sends high only, if its "incoming" send high at the same moment
+        # must find a shortest cycle of its incoming
+        part2_modules[name] = 0
+
+for i in range(1,4000): #4000 is sufficient to find out the cycle
+    total_low += 1 #button to broadcaster - always low
     for target in broadcaster_targets:
         total_low += 1 #broadcaster to target - always low
         if modules[target].status == True:
@@ -80,4 +90,10 @@ for _ in range(1000):
                     queue.append((t, "low"))
                 else:
                     queue.append((t, "high"))
-print("Part 1:",total_high*total_low)
+                    if t in part2_modules.keys():
+                        part2_modules[t] = i
+    if i == 1000:
+        print("Part 1:",total_high*total_low)
+
+#result is LCM of the shortest cycles of "incoming" of "vd" - my input are 4 primes -> may use product
+print("Part 2:", prod(list(part2_modules.values())))
