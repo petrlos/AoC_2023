@@ -40,7 +40,7 @@ def find_path(grid):
                     if row == max_r and col == max_c:
                         return new_status
 
-Added path-tracking, still not correct result#MAIN - part1 should return 928
+#MAIN
 with open("data.txt") as file:
     lines = file.read().splitlines()
 
