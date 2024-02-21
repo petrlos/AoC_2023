@@ -50,6 +50,7 @@ def find_path_part1_and_part2(grid, min_max_steps):
     visited = set()
     min_steps, max_steps = min_max_steps
 
+    results = []
     while heap:
         current = heappop(heap)  # get from heap step with least THL
         for delta_dir in [-1, 1]:  # turn left, turn right
@@ -69,7 +70,9 @@ def find_path_part1_and_part2(grid, min_max_steps):
                         visited.add(checker)
                         heappush(heap, new_status)
                         if row == max_r and col == max_c:
-                            return new_status
+                            results.append(new_status.thl)
+                        if len(results) > 4:
+                            return min(results)
 
 #MAIN
 with open("data.txt") as file:
@@ -80,5 +83,5 @@ grid, max_r, max_c = parse_grid(lines)#row, column
 
 for part, min_max_steps in enumerate([[1,3], [4,10]], start=1):
     result = find_path_part1_and_part2(grid, min_max_steps)
-    print(f"Part {part}:", result.thl)
+    print(f"Part {part}:", result)
     print(f"Total runtime: {datetime.now() - time_start}")
