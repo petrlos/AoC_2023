@@ -1,5 +1,4 @@
 #Advent of Code 2023: Day 19
-from icecream import ic
 from copy import deepcopy
 import re
 from collections import deque
@@ -100,4 +99,5 @@ for interval in intervals_accepted:
         lower, upper = interval[letter]
         multiplier *= (upper - lower + 1)
     result += multiplier
-print(result)
+
+print("Part 2:", result)
